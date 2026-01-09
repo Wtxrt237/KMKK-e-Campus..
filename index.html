@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KMKK e-Campus | Official Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --kmkk-orange: #f39c12; --kmkk-purple: #2c2c54; }
+        .bg-kmkk-purple { background-color: var(--kmkk-purple); }
+        .text-kmkk-orange { color: var(--kmkk-orange); }
+        .border-kmkk-orange { border-color: var(--kmkk-orange); }
+        .hidden { display: none; }
+        html { scroll-behavior: smooth; }
+        
+        .nav-btn.active { color: var(--kmkk-orange); font-weight: bold; }
+
+        /* Countdown Styles */
+        .countdown-box {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Dashboard Button Styles */
+        .dash-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            border-radius: 1rem;
+            background: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .dash-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-color: var(--kmkk-orange);
+        }
+        .dash-btn i { font-size: 2.5rem; margin-bottom: 1rem; color: var(--kmkk-purple); }
+        .dash-btn span { font-weight: bold; color: #4a5568; text-align: center; }
+
+        /* --- CALENDAR STYLES --- */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+        .calendar-day-header {
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+            color: #718096;
+            padding-bottom: 8px;
+        }
+        .calendar-day {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            min-height: 80px;
+            padding: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            position: relative;
+        }
+        .calendar-day:hover {
+            border-color: var(--kmkk-orange);
+            background-color: #fffaf0;
+        }
+        .calendar-day.selected {
+            border-color: var(--kmkk-purple);
+            background-color: #f3f4f6;
+            box-shadow: 0 0 0 2px var(--kmkk-purple) inset;
+        }
+        .calendar-day.today {
+            background-color: #ebf8ff;
+        }
+        .day-number {
+            font-weight: bold;
+            font-size: 0.8rem;
+            color: #4a5568;
+            margin-bottom: 2px;
+            width: 100%;
+        }
+        .event-indicator-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+            width: 100%;
+        }
+        .event-dot {
+            height: 6px;
+            width: 6px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            border-radius: 50%;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800">
+
+    <nav id="public-nav" class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex items-center cursor-pointer" onclick="showSection('home')">
+                    <img src="logo.png" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Logo_KMKK_Berbingkai.png/500px-Logo_KMKK_Berbingkai.png'" alt="KMKK Logo" class="h-14 w-auto mr-4 rounded">
+                    <div class="hidden lg:block font-bold text-lg leading-tight uppercase">
+                        <span class="text-kmkk-purple">KMKK e-Campus</span>
+                    </div>
+                </div>
+                
+                <div class="hidden md:flex space-x-6 text-sm font-medium uppercase tracking-wide items-center">
+                    <button onclick="showSection('home')" id="nav-home" class="nav-btn hover:text-kmkk-orange transition active text-kmkk-orange">Home</button>
+                    <button onclick="showSection('info')" id="nav-info" class="nav-btn hover:text-kmkk-orange transition">Profile</button>
+                    <button onclick="showSection('contact')" id="nav-contact" class="nav-btn hover:text-kmkk-orange transition">Contact Us</button>
+                    <button onclick="showSection('pathway')" id="nav-pathway" class="nav-btn hover:text-kmkk-orange transition">Academics</button>
+                    <button onclick="showSection('courses')" id="nav-courses" class="nav-btn hover:text-kmkk-orange transition">Programs</button>
+                    <button onclick="showSection('news')" id="nav-news" class="nav-btn hover:text-kmkk-orange transition">News</button>
+                    <button onclick="showLogin()" class="bg-kmkk-purple text-white px-5 py-2 rounded-md hover:bg-orange-500 transition shadow-md">Log In</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div id="home-section" class="public-page">
+        <header class="bg-kmkk-purple text-white py-24 px-4 text-center">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-4xl md:text-5xl font-bold mb-6 tracking-tight">Excellence Generates Competent Technocrats</h1>
+                <p class="text-xl opacity-90 mb-10 leading-relaxed font-light">
+                    Welcome to Kolej Matrikulasi Kejuruteraan Kedah, where excellent engineers are born.
+                </p>
+                <div class="flex justify-center gap-4">
+                    <button onclick="showSection('courses')" class="bg-kmkk-orange text-white px-8 py-3 rounded font-bold hover:bg-white hover:text-kmkk-purple transition shadow-lg transform hover:-translate-y-1">Explore Programs</button>
+                    <button onclick="showSection('info')" class="border-2 border-white text-white px-8 py-3 rounded font-bold hover:bg-white hover:text-kmkk-purple transition">About Us</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 py-16">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                <div onclick="showSection('info')" class="cursor-pointer p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition">
+                    <i class="fas fa-university text-3xl text-kmkk-orange mb-4"></i>
+                    <h3 class="font-bold mb-2">College Profile</h3>
+                    <p class="text-sm text-gray-500">History, Vision, Mission & Logo Rationale.</p>
+                </div>
+                <div onclick="showSection('courses')" class="cursor-pointer p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition group">
+                    <i class="fas fa-tools text-3xl text-kmkk-orange mb-4 group-hover:scale-110 transition"></i>
+                    <h3 class="font-bold mb-2">Engineering Program</h3>
+                    <p class="text-sm text-gray-500">Details on the 4 major engineering streams.</p>
+                </div>
+                <div onclick="showSection('contact')" class="cursor-pointer p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition">
+                    <i class="fas fa-map-marker-alt text-3xl text-kmkk-orange mb-4"></i>
+                    <h3 class="font-bold mb-2">Contact Us</h3>
+                    <p class="text-sm text-gray-500">Location, Phone, Fax & Social Media.</p>
+                </div>
+                <div onclick="showSection('news')" class="cursor-pointer p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition group">
+                    <i class="fas fa-newspaper text-3xl text-kmkk-orange mb-4 group-hover:scale-110 transition"></i>
+                    <h3 class="font-bold mb-2">News & Events</h3>
+                    <p class="text-sm text-gray-500">Achievements, announcements, and upcoming college activities.</p>
+                </div>
+            </div>
+        </main>
+        
+        <footer class="bg-gray-900 text-white py-10 px-4 text-center text-sm">
+            <p>© 2026 Kolej Matrikulasi Kejuruteraan Kedah (KMKK). All Rights Reserved.</p>
+        </footer>
+    </div>
+
+    <div id="info-section" class="public-page hidden bg-gray-100 min-h-screen">
+        <div class="bg-kmkk-purple text-white py-10 px-4 text-center">
+            <h1 class="text-3xl font-bold uppercase tracking-widest">Institutional Profile</h1>
+            <p class="text-sm opacity-80 mt-2">Get to know KMKK</p>
+        </div>
+        <div class="max-w-5xl mx-auto px-4 py-12">
+    
+            <div class="bg-white rounded-xl shadow p-8 mb-8">
+                <h1 class="text-3xl font-bold text-purple-900 mb-4">Kolej Matrikulasi Kejuruteraan Kedah (KMKK)</h1>
+                <p class="text-gray-700 leading-relaxed text-lg">
+                    KMKK is a Matriculation College established in Malaysia, strategically located in <strong>Pendang, Kedah</strong>. It serves as a premier hub for pre-university engineering education.
+                </p>
+            </div>
+        
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-gradient-to-br from-purple-900 to-indigo-900 text-white p-8 rounded-xl shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-eye text-2xl text-orange-400 mr-3"></i>
+                        <h2 class="text-2xl font-bold uppercase tracking-wider">Vision</h2>
+                    </div>
+                    <p class="opacity-90">"A premier generator of quality students for higher learning institutions in the fields of science, technology, and professionalism."</p>
+                </div>
+                <div class="bg-gradient-to-br from-orange-500 to-red-500 text-white p-8 rounded-xl shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-bullseye text-2xl text-white mr-3"></i>
+                        <h2 class="text-2xl font-bold uppercase tracking-wider">Mission</h2>
+                    </div>
+                    <p class="opacity-90">"To develop student potential in science, technology, and professional fields through quality pre-university education to produce excellent human capital."</p>
+                </div>
+            </div>
+        
+            <div class="bg-white rounded-xl shadow p-8 mb-8 border-l-4 border-purple-900">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4"><i class="fas fa-history text-orange-500 mr-2"></i> Background & History</h2>
+                <div class="space-y-4 text-gray-600 text-justify">
+                    <p>
+                        Kolej Matrikulasi Teknikal Kedah (KMTK) began operations in <strong>May 2009</strong>. Previously, it was known as <em>Sekolah Menengah Teknik Pendang</em> before being upgraded to its current status as a Technical Matriculation College.
+                    </p>
+                    <p>
+                        The inaugural intake in 2009 consisted of only <strong>99 students</strong>. By 2010, the student population grew to 348. Currently, the college can accommodate approximately <strong>518 students</strong> (both male and female) at any given time.
+                    </p>
+                    <p>
+                        It is mandatory for every student to reside in the provided Residential Colleges (Hostels). With complete infrastructure and facilities in every residential block, student comfort and welfare are guaranteed.
+                    </p>
+                </div>
+            </div>
+        
+            <div class="bg-white rounded-xl shadow p-8 mb-12">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Rationale of the College Logo</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="text-center">
+                        <div class="h-16 w-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4 text-orange-500 text-2xl">
+                            <i class="fas fa-cog fa-spin" style="animation-duration: 10s;"></i>
+                        </div>
+                        <h3 class="font-bold text-lg mb-2 text-purple-900">3 Side Gears (Orange)</h3>
+                        <ul class="text-sm text-gray-500 text-left list-disc list-inside space-y-2">
+                            <li><strong>Creativity & Innovation:</strong> Represents the vibrant nature of the KMKK community.</li>
+                            <li><strong>Pendang Identity:</strong> Orange is the official color of the Pendang district.</li>
+                            <li><strong>Growth:</strong> Gears increasing from small to large symbolize the growth of knowledge and professionalism.</li>
+                        </ul>
+                    </div>
+        
+                    <div class="text-center">
+                        <div class="h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-800 text-2xl">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                        <h3 class="font-bold text-lg mb-2 text-purple-900">3 Core Gears (Blue)</h3>
+                        <ul class="text-sm text-gray-500 text-left list-disc list-inside space-y-2">
+                            <li><strong>Unity:</strong> Blue represents harmony and consensus in achieving the Vision and Mission.</li>
+                            <li><strong>The 3 Streams:</strong> Represents the engineering disciplines offered:
+                                <ul class="pl-6 list-[square] text-xs pt-1">
+                                    <li>Civil Engineering</li>
+                                    <li>Electrical & Electronic Engineering</li>
+                                    <li>Mechanical Engineering</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+        
+                    <div class="text-center">
+                        <div class="h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-600 text-2xl">
+                            <i class="fas fa-shapes"></i>
+                        </div>
+                        <h3 class="font-bold text-lg mb-2 text-purple-900">Triangle Shape</h3>
+                        <p class="text-sm text-gray-500">
+                            The combination of side and core gears forms a triangle, symbolizing the <strong>integration</strong> of the Ministry's and College's Vision/Mission to generate engineering technocrats for the nation's needs.
+                        </p>
+                    </div> 
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="contact-section" class="public-page hidden bg-gray-100 min-h-screen">
+        <div class="bg-kmkk-purple text-white py-10 px-4 text-center">
+            <h1 class="text-3xl font-bold uppercase tracking-widest">Contact Us</h1>
+            <p class="text-sm opacity-80 mt-2">Reach out to KMKK</p>
+        </div>
+        <div class="max-w-4xl mx-auto px-4 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-8 rounded-xl shadow-lg border-t-8 border-kmkk-purple">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                        <i class="fas fa-building mr-3 text-kmkk-orange"></i> Address & Inquiries
+                    </h3>
+                    <div class="space-y-6 text-gray-600">
+                        <p class="flex items-start"><i class="fas fa-map-marker-alt mt-1 w-6 text-kmkk-purple"></i> Pokok Tai, Jln Jenun,<br>Kampung Pokok Tai,<br>06720 Pendang, Kedah</p>
+                        <p class="flex items-center"><i class="fas fa-phone-alt w-6 text-kmkk-purple"></i> 04-4682508</p>
+                        <p class="flex items-center"><i class="fas fa-fax w-6 text-kmkk-purple"></i> 04-4682509</p>
+                        <p class="flex items-center"><i class="fas fa-envelope w-6 text-kmkk-purple"></i> admin.kmtk.matrik@1govuc.gov.my</p>
+                    </div>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg border-t-8 border-kmkk-orange">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                        <i class="fas fa-hashtag mr-3 text-kmkk-orange"></i> Social Media
+                    </h3>
+                    <div class="space-y-4">
+                        <a href="https://www.facebook.com/my.kmkk/" target="_blank" class="flex items-center p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition">
+                            <i class="fab fa-facebook text-blue-800 text-2xl mr-4"></i>
+                            <span class="font-bold text-blue-800">Facebook</span>
+                        </a>
+                        <a href="https://www.instagram.com/kmkkrasmi/?hl=en" target="_blank" class="flex items-center p-4 bg-pink-50 hover:bg-pink-100 rounded-lg transition">
+                            <i class="fab fa-instagram text-pink-700 text-2xl mr-4"></i>
+                            <span class="font-bold text-pink-700">Instagram</span>
+                        </a>
+                         <a href="https://www.tiktok.com/@kmkkrasmi?is_from_webapp=1&sender_device=pc" class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition">
+                            <i class="fab fa-tiktok text-black text-2xl mr-4"></i>
+                            <span class="font-bold text-black">TikTok</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="pathway-section" class="public-page hidden bg-gray-50 min-h-screen">
+        <div class="bg-gradient-to-r from-indigo-900 to-purple-800 text-white py-12 px-4 shadow-xl">
+            <div class="max-w-4xl mx-auto text-center">
+                <h2 class="text-2xl md:text-3xl font-bold mb-2 uppercase tracking-wider text-kmkk-orange">Road to Excellence</h2>
+                <h1 class="text-xl md:text-2xl font-light mb-6">Countdown to PSPM 2 (May 5 - May 12, 2026)</h1>
+                <div class="flex justify-center gap-4 text-center" id="countdown-timer">
+                    <div class="countdown-box p-3 md:p-4 rounded w-20 md:w-24"><span id="days" class="block text-3xl font-bold">00</span><span class="text-xs uppercase">Days</span></div>
+                    <div class="countdown-box p-3 md:p-4 rounded w-20 md:w-24"><span id="hours" class="block text-3xl font-bold">00</span><span class="text-xs uppercase">Hours</span></div>
+                    <div class="countdown-box p-3 md:p-4 rounded w-20 md:w-24"><span id="minutes" class="block text-3xl font-bold">00</span><span class="text-xs uppercase">Mins</span></div>
+                    <div class="countdown-box p-3 md:p-4 rounded w-20 md:w-24 border-kmkk-orange border-2"><span id="seconds" class="block text-3xl font-bold text-kmkk-orange">00</span><span class="text-xs uppercase">Secs</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 py-12">
+            <div class="mb-16">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold text-kmkk-purple">General Engineering Pathway</h2>
+                    <p class="text-gray-500 mt-2">Your roadmap from KMKK to Professional Engineer (PE)</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <div class="bg-white p-5 rounded-lg shadow border-b-4 border-kmkk-orange relative">
+                        <div class="absolute -top-3 -left-3 bg-kmkk-orange text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">1</div>
+                        <h3 class="font-bold text-kmkk-purple mb-2 text-sm uppercase">Pre-University</h3>
+                        <p class="text-xs text-gray-600">Complete Matriculation/Foundation focusing on Math, Physics & Chemistry.</p>
+                    </div>
+                     <div class="bg-white p-5 rounded-lg shadow border-b-4 border-blue-500 relative">
+                        <div class="absolute -top-3 -left-3 bg-blue-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">2</div>
+                        <h3 class="font-bold text-kmkk-purple mb-2 text-sm uppercase">Bachelor's Degree</h3>
+                        <p class="text-xs text-gray-600">Earn a 3-4 year B.Eng degree in a chosen specialization from an accredited program.</p>
+                    </div>
+                     <div class="bg-white p-5 rounded-lg shadow border-b-4 border-indigo-500 relative">
+                        <div class="absolute -top-3 -left-3 bg-indigo-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">3</div>
+                        <h3 class="font-bold text-kmkk-purple mb-2 text-sm uppercase">Graduate Engineer</h3>
+                        <p class="text-xs text-gray-600">Register with the Board of Engineers Malaysia (BEM) upon graduation.</p>
+                    </div>
+                     <div class="bg-white p-5 rounded-lg shadow border-b-4 border-purple-500 relative">
+                        <div class="absolute -top-3 -left-3 bg-purple-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">4</div>
+                        <h3 class="font-bold text-kmkk-purple mb-2 text-sm uppercase">Experience</h3>
+                        <p class="text-xs text-gray-600">Gain 3-4 years of practical work experience under a Professional Engineer.</p>
+                    </div>
+                     <div class="bg-white p-5 rounded-lg shadow border-b-4 border-green-500 relative">
+                        <div class="absolute -top-3 -left-3 bg-green-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">5</div>
+                        <h3 class="font-bold text-kmkk-purple mb-2 text-sm uppercase">P.E. Status</h3>
+                        <p class="text-xs text-gray-600">Pass professional assessment exams to become a licensed Professional Engineer.</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="text-3xl font-bold text-kmkk-purple mb-8 text-center">Specialized Focus Areas & Careers</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                <div class="bg-white rounded-xl shadow-lg border-t-8 border-yellow-500 overflow-hidden flex flex-col">
+                    <div class="p-6 flex-grow">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-xl font-bold text-gray-800">Civil Engineering</h3>
+                            <i class="fas fa-hard-hat text-4xl text-yellow-200"></i>
+                        </div>
+                        <p class="text-sm font-bold text-kmkk-orange mb-4">Focus: Construction & Structural Mechanics</p>
+                        
+                        <div class="mb-4">
+                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Academic Subjects</h4>
+                            <ul class="text-sm text-gray-700 subject-list">
+                                <li><i class="fas fa-book"></i> Structural Analysis</li>
+                                <li><i class="fas fa-cube"></i> Materials Science</li>
+                                <li><i class="fas fa-mountain"></i> Geotechnics & Surveying</li>
+                                <li><i class="fas fa-tasks"></i> Construction Management</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Career Paths</h4>
+                            <ul class="text-sm text-gray-700 subject-list">
+                                <li><i class="fas fa-briefcase"></i> Structural Engineer</li>
+                                <li><i class="fas fa-hard-hat"></i> Construction Manager</li>
+                                <li><i class="fas fa-drafting-compass"></i> Geotechnical Engineer</li>
+                                <li><i class="fas fa-city"></i> Urban Planner</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg border-t-8 border-red-500 overflow-hidden flex flex-col">
+                    <div class="p-6 flex-grow">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-xl font-bold text-gray-800">Mechanical Engineering</h3>
+                            <i class="fas fa-cogs text-4xl text-red-200"></i>
+                        </div>
+                        <p class="text-sm font-bold text-kmkk-orange mb-4">Focus: Thermodynamics & Kinetics</p>
+                        
+                        <div class="mb-4">
+                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Academic Subjects</h4>
+                            <ul class="text-sm text-gray-700 subject-list">
+                                <li><i class="fas fa-fire"></i> Thermodynamics & Fluid Dynamics</li>
+                                <li><i class="fas fa-temperature-high"></i> Heat Transfer</li>
+                                <li><i class="fas fa-gamepad"></i> Control Systems</li>
+                                <li><i class="fas fa-atom"></i> Materials Science</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Career Paths</h4>
+                            <ul class="text-sm text-gray-700 subject-list">
+                                <li><i class="fas fa-solar-panel"></i> Thermal/Energy Engineer</li>
+                                <li><i class="fas fa-car"></i> Automotive/Aerospace Engineer</li>
+                                <li><i class="fas fa-industry"></i> Manufacturing Engineer</li>
+                                <li><i class="fas fa-robot"></i> Robotics Engineer</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg border-t-8 border-blue-500 overflow-hidden flex flex-col">
+                    <div class="p-6 flex-grow">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-xl font-bold text-gray-800">Electrical Engineering</h3>
+                            <i class="fas fa-bolt text-4xl text-blue-200"></i>
+                        </div>
+                        <p class="text-sm font-bold text-kmkk-orange mb-4">Focus: Circuits & Electronics</p>
+                        
+                        <div class="mb-4">
+                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Academic Subjects</h4>
+                            <ul class="text-sm text-gray-700 subject-list">
+                                <li><i class="fas fa-microchip"></i> Circuit Theory & Microcontrollers</li>
+                                <li><i class="fas fa-magnet"></i> Electromagnetism</li>
+                                <li><i class="fas fa-plug"></i> Power Systems</li>
+                                <li><i class="fas fa-wave-square"></i> Signal Processing</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Career Paths</h4>
+                            <ul class="text-sm text-gray-700 subject-list">
+                                <li><i class="fas fa-pencil-ruler"></i> Electronics Design Engineer</li>
+                                <li><i class="fas fa-charging-station"></i> Power Systems Engineer</li>
+                                <li><i class="fas fa-satellite-dish"></i> Telecommunications Engineer</li>
+                                <li><i class="fas fa-laptop-code"></i> Computer Hardware Engineer</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="courses-section" class="public-page hidden bg-gray-50 min-h-screen">
+        <div class="bg-kmkk-purple text-white py-10 px-4 text-center">
+            <h1 class="text-3xl font-bold uppercase tracking-widest">Engineering Course Structure</h1>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 py-10">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-kmkk-purple">Engineering Specializations</h2>
+                <p class="text-gray-600 mt-2">KMKK offers four distinct pathways. All students study the same core sciences, differentiating only in their specialized engineering major.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <div class="bg-white rounded-xl shadow-lg border-t-8 border-gray-500 overflow-hidden hover:-translate-y-1 transition duration-300">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800">Basic Engineering</h3>
+                                <span class="text-xs font-bold text-white bg-gray-500 px-2 py-1 rounded">Module 1</span>
+                            </div>
+                            <i class="fas fa-cogs text-4xl text-gray-200"></i>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-6">Focuses on the fundamental principles of engineering design, mechanics, and materials suitable for broad technical applications.</p>
+                        
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-kmkk-purple text-sm mb-3 uppercase border-b pb-2">Course Structure</h4>
+                            <ul class="text-sm text-gray-700 subject-list">
+                                <li class="font-bold text-kmkk-orange"><i class="fas fa-star text-kmkk-orange"></i> Basic Engineering</li>
+                                <li><i class="fas fa-calculator"></i> Engineering Mathematics</li>
+                                <li><i class="fas fa-flask"></i> Engineering Chemistry</li>
+                                <li><i class="fas fa-atom"></i> Engineering Physics</li>
+                                <li><i class="fas fa-book-open"></i> General Studies (Pengajian Am)</li>
+                                <li><i class="fas fa-language"></i> English Language</li>
+                                <li><i class="fas fa-mosque"></i> Islamic Studies / Moral Studies</li>
+                                <li><i class="fas fa-running"></i> Co-Curriculum</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg border-t-8 border-yellow-500 overflow-hidden hover:-translate-y-1 transition duration-300">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800">Civil Engineering</h3>
+                                <span class="text-xs font-bold text-white bg-yellow-500 px-2 py-1 rounded">Module 2</span>
+                            </div>
+                            <i class="fas fa-hard-hat text-4xl text-yellow-100"></i>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-6">Concentrates on structural integrity, construction materials, fluid mechanics, and surveying for infrastructure development.</p>
+                        
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-kmkk-purple text-sm mb-3 uppercase border-b pb-2">Course Structure</h4>
+                            <ul class="text-sm text-gray-700 subject-list">
+                                <li class="font-bold text-kmkk-orange"><i class="fas fa-star text-kmkk-orange"></i> Civil Engineering</li>
+                                <li><i class="fas fa-calculator"></i> Engineering Mathematics</li>
+                                <li><i class="fas fa-flask"></i> Engineering Chemistry</li>
+                                <li><i class="fas fa-atom"></i> Engineering Physics</li>
+                                <li><i class="fas fa-book-open"></i> General Studies (Pengajian Am)</li>
+                                <li><i class="fas fa-language"></i> English Language</li>
+                                <li><i class="fas fa-mosque"></i> Islamic Studies / Moral Studies</li>
+                                <li><i class="fas fa-running"></i> Co-Curriculum</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg border-t-8 border-red-500 overflow-hidden hover:-translate-y-1 transition duration-300">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800">Mechanical Engineering</h3>
+                                <span class="text-xs font-bold text-white bg-red-500 px-2 py-1 rounded">Module 3</span>
+                            </div>
+                            <i class="fas fa-car-battery text-4xl text-red-100"></i>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-6">Studies thermodynamics, kinetics, robotics, and machine design. Ideal for students interested in automotive and manufacturing.</p>
+                        
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-kmkk-purple text-sm mb-3 uppercase border-b pb-2">Course Structure</h4>
+                            <ul class="text-sm text-gray-700 subject-list">
+                                <li class="font-bold text-kmkk-orange"><i class="fas fa-star text-kmkk-orange"></i> Mechanical Engineering</li>
+                                <li><i class="fas fa-calculator"></i> Engineering Mathematics</li>
+                                <li><i class="fas fa-flask"></i> Engineering Chemistry</li>
+                                <li><i class="fas fa-atom"></i> Engineering Physics</li>
+                                <li><i class="fas fa-book-open"></i> General Studies (Pengajian Am)</li>
+                                <li><i class="fas fa-language"></i> English Language</li>
+                                <li><i class="fas fa-mosque"></i> Islamic Studies / Moral Studies</li>
+                                <li><i class="fas fa-running"></i> Co-Curriculum</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg border-t-8 border-blue-500 overflow-hidden hover:-translate-y-1 transition duration-300">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800">Electrical Engineering</h3>
+                                <span class="text-xs font-bold text-white bg-blue-500 px-2 py-1 rounded">Module 4</span>
+                            </div>
+                            <i class="fas fa-bolt text-4xl text-blue-100"></i>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-6">Focuses on circuits, electronics, power systems, and digital logic. Prepares students for the high-tech electronics sector.</p>
+                        
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-kmkk-purple text-sm mb-3 uppercase border-b pb-2">Course Structure</h4>
+                            <ul class="text-sm text-gray-700 subject-list">
+                                <li class="font-bold text-kmkk-orange"><i class="fas fa-star text-kmkk-orange"></i> Electrical Engineering</li>
+                                <li><i class="fas fa-calculator"></i> Engineering Mathematics</li>
+                                <li><i class="fas fa-flask"></i> Engineering Chemistry</li>
+                                <li><i class="fas fa-atom"></i> Engineering Physics</li>
+                                <li><i class="fas fa-book-open"></i> General Studies (Pengajian Am)</li>
+                                <li><i class="fas fa-language"></i> English Language</li>
+                                <li><i class="fas fa-mosque"></i> Islamic Studies / Moral Studies</li>
+                                <li><i class="fas fa-running"></i> Co-Curriculum</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+
+</div> </div>     <div id="news-section" class="public-page hidden bg-gray-50 min-h-screen">
+    <div class="bg-kmkk-purple text-white py-10 px-4 text-center">
+        <h1 class="text-3xl font-bold uppercase tracking-widest">Happenings @ KMKK</h1>
+        <p class="text-sm opacity-80 mt-2">Celebrating Excellence & Community</p>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 py-12">
+        <div id="dynamic-news-feed" class="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+            <div class="bg-white rounded-xl shadow-lg border-t-8 border-kmkk-orange overflow-hidden">
+                <div class="p-6 border-b border-gray-100 bg-orange-50 flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-gray-800">Upcoming Events</h3>
+                    <i class="fas fa-calendar-alt text-2xl text-kmkk-orange"></i>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="flex group cursor-pointer">
+                        <div class="bg-gray-100 rounded-lg p-3 text-center min-w-[70px] group-hover:bg-kmkk-orange group-hover:text-white transition"><span class="block text-xs font-bold uppercase">May</span><span class="block text-2xl font-bold">15</span></div>
+                        <div class="ml-4 flex flex-col justify-center"><h4 class="font-bold text-gray-800">Teacher's Day</h4><p class="text-xs text-gray-500">Dewan Utama</p></div>
+                    </div>
+                    <div class="flex group cursor-pointer">
+                        <div class="bg-gray-100 rounded-lg p-3 text-center min-w-[70px] group-hover:bg-kmkk-orange group-hover:text-white transition"><span class="block text-xs font-bold uppercase">Jun</span><span class="block text-2xl font-bold">20</span></div>
+                        <div class="ml-4 flex flex-col justify-center"><h4 class="font-bold text-gray-800">Engineering Fair</h4><p class="text-xs text-gray-500">Foyer</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg border-t-8 border-yellow-500 overflow-hidden">
+                <div class="p-6 border-b border-gray-100 bg-yellow-50 flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-gray-800">Achievements</h3>
+                    <i class="fas fa-trophy text-2xl text-yellow-600"></i>
+                </div>
+                <div class="p-6">
+                    <ul class="space-y-6">
+                        <li class="flex items-start">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 mr-4">
+                                <i class="fas fa-baseball-ball"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-800">Double Champions</h4>
+                                <p class="text-xs text-gray-500 mb-1">MASCAR 2025/2026</p>
+                                <p class="text-sm text-gray-600">Male & Female Softball teams swept both Gold Medals.</p>
+                            </div>
+                        </li>
+                        <li class="text-xs font-bold text-gray-400 uppercase tracking-wider mt-4 mb-2">International & National Innovations</li>
+
+                        <li class="flex items-start"><i class="fas fa-medal text-yellow-500 mt-1 mr-3"></i><div><h4 class="font-bold text-sm">Gold Award: I-Compex 2025</h4><p class="text-xs text-gray-500">Project: "Eco-Brick from Paddy Husks"</p></div></li>
+                        <li class="flex items-start"><i class="fas fa-medal text-yellow-500 mt-1 mr-3"></i><div><h4 class="font-bold text-sm">Gold Award: KIK Kebangsaan</h4><p class="text-xs text-gray-500">Project: "Smart Traffic AI System"</p></div></li>
+                        <li class="flex items-start"><i class="fas fa-medal text-yellow-500 mt-1 mr-3"></i><div><h4 class="font-bold text-sm">Best Presenter Award</h4><p class="text-xs text-gray-500">SIRIM Invention Fair 2025</p></div></li>
+                        <li class="flex items-start"><i class="fas fa-medal text-gray-400 mt-1 mr-3"></i><div><h4 class="font-bold text-sm">Silver: MTE 2025</h4><p class="text-xs text-gray-500">Project: "Auto-Drip Hydroponics"</p></div></li>
+                        <li class="flex items-start"><i class="fas fa-medal text-yellow-500 mt-1 mr-3"></i><div><h4 class="font-bold text-sm">Champion: Robotics Open</h4><p class="text-xs text-gray-500">Category: Line Follower Advanced</p></div></li>
+                        <li class="flex items-start"><i class="fas fa-medal text-yellow-500 mt-1 mr-3"></i><div><h4 class="font-bold text-sm">Gold Award: CITREX 2025</h4><p class="text-xs text-gray-500">Project: "Biodegradable Plastic"</p></div></li>
+                        <li class="flex items-start"><i class="fas fa-medal text-yellow-600 mt-1 mr-3"></i><div><h4 class="font-bold text-sm">Bronze: Seoul Intl Invention</h4><p class="text-xs text-gray-500">Project: "Solar Power Bank v2"</p></div></li>
+                        <li class="flex items-start"><i class="fas fa-star text-blue-500 mt-1 mr-3"></i><div><h4 class="font-bold text-sm">Special Award: Green Tech</h4><p class="text-xs text-gray-500">Awarded by JAS Kedah</p></div></li>
+                        <li class="flex items-start"><i class="fas fa-medal text-yellow-500 mt-1 mr-3"></i><div><h4 class="font-bold text-sm">Gold: STEM Decathlon</h4><p class="text-xs text-gray-500">Physics Challenge Team</p></div></li>
+                        <li class="flex items-start"><i class="fas fa-medal text-gray-400 mt-1 mr-3"></i><div><h4 class="font-bold text-sm">Silver: World Young Inventors</h4><p class="text-xs text-gray-500">Project: "Thermal Waste Converter"</p></div></li>
+                        <li class="flex items-start"><i class="fas fa-medal text-yellow-500 mt-1 mr-3"></i><div><h4 class="font-bold text-sm">Winner: Hackathon 2025</h4><p class="text-xs text-gray-500">App Development Category</p></div></li>
+                        <li class="flex items-start"><i class="fas fa-medal text-yellow-500 mt-1 mr-3"></i><div><h4 class="font-bold text-sm">Gold: PIITRAM 2025</h4><p class="text-xs text-gray-500">Social Science Innovation</p></div></li>
+                        <li class="flex items-start"><i class="fas fa-medal text-yellow-500 mt-1 mr-3"></i><div><h4 class="font-bold text-sm">Gold: National Chem-E Car</h4><p class="text-xs text-gray-500">Distance Category</p></div></li>
+                        <li class="flex items-start"><i class="fas fa-medal text-gray-400 mt-1 mr-3"></i><div><h4 class="font-bold text-sm">Silver: Bridge Building Comp</h4><p class="text-xs text-gray-500">Load Bearing Efficiency</p></div></li>
+                        <li class="flex items-start"><i class="fas fa-medal text-yellow-500 mt-1 mr-3"></i><div><h4 class="font-bold text-sm">Gold: Inovasi Pendidikan</h4><p class="text-xs text-gray-500">Unit Fizik KMKK</p></div></li>
+                        <li class="flex items-start"><i class="fas fa-medal text-yellow-600 mt-1 mr-3"></i><div><h4 class="font-bold text-sm">Bronze: Rocketry Challenge</h4><p class="text-xs text-gray-500">Targeting Category</p></div></li>
+                        <li class="flex items-start"><i class="fas fa-medal text-yellow-500 mt-1 mr-3"></i><div><h4 class="font-bold text-sm">Best Innovation</h4><p class="text-xs text-gray-500">Kedah State Level</p></div></li>
+                        <li class="flex items-start"><i class="fas fa-certificate text-purple-500 mt-1 mr-3"></i><div><h4 class="font-bold text-sm">5 Copyrights Granted</h4><p class="text-xs text-gray-500">Intellectual Property Corp</p></div></li>
+                        <li class="flex items-start"><i class="fas fa-medal text-yellow-500 mt-1 mr-3"></i><div><h4 class="font-bold text-sm">Gold: F1 in Schools</h4><p class="text-xs text-gray-500">Regional Qualifier</p></div></li>
+                         <li class="flex items-start"><i class="fas fa-medal text-gray-400 mt-1 mr-3"></i><div><h4 class="font-bold text-sm">Silver: Math Olympiad</h4><p class="text-xs text-gray-500">Individual Category</p></div></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg border-t-8 border-blue-500 overflow-hidden flex flex-col">
+                <div class="p-6 border-b border-gray-100 bg-blue-50 flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-gray-800">Latest News</h3>
+                    <i class="fas fa-bullhorn text-2xl text-blue-600"></i>
+                </div>
+                <div class="p-0">
+                    <div onclick="showSection('news-softball')" class="hover:bg-blue-50 p-6 border-b transition cursor-pointer group border-l-4 border-l-transparent hover:border-l-blue-600">
+                        <div class="flex justify-between items-start">
+                            <span class="text-xs font-bold text-white bg-red-600 px-2 py-1 rounded">SPORTS</span>
+                            <span class="text-xs text-gray-400">Just now</span>
+                        </div>
+                        <h4 class="font-bold text-gray-800 mt-2 group-hover:text-blue-700">DOUBLE CHAMPIONSHIP: KMKK Sweeps MASCAR 2025/2026</h4>
+                        <p class="text-sm text-gray-600 mt-2 line-clamp-3">
+                            KMKK male and female softball teams defied the odds to become Overall Champions...
+                        </p>
+                        <p class="text-xs font-bold text-blue-600 mt-3">Read Full Story &rarr;</p>
+                    </div>
+
+                    <div onclick="showSection('news-intake')"class="hover:bg-gray-50 p-6 border-b transition cursor-pointer">
+                        <span class="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded">Admin</span>
+                        <h4 class="font-bold text-gray-800 mt-2">New Intake Registration</h4>
+                        <p class="text-xs text-gray-400 mt-2">2 hours ago</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div id="news-softball-section" class="public-page hidden bg-white min-h-screen">
+    <div class="bg-gray-900 text-white py-4 px-4 sticky top-20 z-40 shadow-md">
+        <div class="max-w-4xl mx-auto flex items-center">
+            <button onclick="showSection('news')" class="flex items-center text-gray-300 hover:text-white transition">
+                <i class="fas fa-arrow-left mr-2"></i> Back to News
+            </button>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 py-12">
+        <span class="text-sm font-bold text-red-600 uppercase tracking-wider">Sports Achievement</span>
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mt-2 mb-4 leading-tight">DOUBLE CHAMPIONSHIP: KMKK Sweeps Overall Titles at MASCAR 2025/2026</h1>
+        
+        <div class="flex items-center text-gray-500 text-sm mb-8 border-b pb-8">
+            <i class="far fa-calendar-alt mr-2"></i> January 08, 2026
+            <span class="mx-3">•</span>
+            <i class="far fa-user mr-2"></i> Sports Unit
+        </div>
+
+        <div class="bg-gray-200 w-full h-64 md:h-96 rounded-xl mb-8 flex items-center justify-center text-gray-400">
+            <div class="text-center">
+                <i class="fas fa-camera text-4xl mb-2"></i>
+            </div>
+        </div>
+
+        <div class="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-6">
+            <p class="font-semibold text-xl text-gray-900">
+                KOLEJ MATRIKULASI KEDAH – "Nothing is impossible with high fighting spirit."
+            </p>
+            <p>
+                That was the powerful statement proven by the Kolej Matrikulasi Kejuruteraan Kedah (KMKK) male and female softball teams. Both squads were crowned <strong>Overall Champions</strong> in the Matriculation Carnival (MASCAR) 2025/2026.
+            </p>
+            <p>
+                What makes this victory even more impressive is that both KMKK squads managed to climb the highest podium and defeat challengers from across the country despite only undergoing intensive training for <strong>less than three weeks</strong>.
+            </p>
+
+            <h3 class="text-2xl font-bold text-kmkk-purple mt-8">Extraordinary Field Domination</h3>
+            <ul class="list-disc pl-6 space-y-2">
+                <li><strong>KMKK Male Team:</strong> Featuring powerful pitching and solid batting, the men's team successfully defeated the tournament favorites.</li>
+                <li><strong>KMKK Female Team:</strong> Agility and an impenetrable defense strategy became the key to the women's team victory.</li>
+            </ul>
+
+            <h3 class="text-2xl font-bold text-kmkk-purple mt-8">Recipe for Success: Quality Over Quantity</h3>
+            <p>
+                According to the KMKK coaching lineup, the short 21-day period was not a hurdle; instead, it became a catalyst for the players to train with greater focus.
+            </p>
+            <blockquote class="bg-blue-50 border-l-4 border-blue-600 p-4 italic text-gray-800 my-6">
+                "We focused on basic techniques and team mental chemistry... seeing both teams emerge as champions proves the quality of KMKK athletes."
+            </blockquote>
+        </div>
+        
+        <div class="mt-12 pt-8 border-t flex justify-center">
+            <button onclick="showSection('news')" class="bg-kmkk-orange text-white px-8 py-3 rounded hover:bg-orange-600 transition font-bold shadow-lg">
+                Back to News List
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="news-intake-section" class="public-page hidden bg-white min-h-screen">
+    <div class="bg-gray-900 text-white py-4 px-4 sticky top-20 z-40 shadow-md">
+        <div class="max-w-4xl mx-auto flex items-center">
+            <button onclick="showSection('news')" class="flex items-center text-gray-300 hover:text-white transition">
+                <i class="fas fa-arrow-left mr-2"></i> Back to News
+            </button>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 py-12">
+        <span class="text-sm font-bold text-purple-600 uppercase tracking-wider">Academic News</span>
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mt-2 mb-4">Welcome Home: Session 2026/2027 Registration Day</h1>
+        <div class="flex items-center text-gray-500 text-sm mb-8 border-b pb-8"><i class="far fa-calendar-alt mr-2"></i> Jan 02, 2026</div>
+
+        <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" 
+             alt="Student Registration Day" 
+             class="w-full h-64 md:h-96 object-cover rounded-xl shadow-lg mb-10">
+
+        <div class="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-6">
+            <p><strong>PENDANG-</strong> The atmosphere at Kolej Matrikulasi Kejuruteraan Kedah was vibrant today as over 2,000 new students registered for the 2026/2027 academic session.</p>
+            <p>Parents and students began arriving as early as 7:00 AM, greeted by the Student Representative Council (JPP) who assisted with luggage and navigation.</p>
+            <h3 class="text-xl font-bold text-gray-900">A Message from the Director</h3>
+            <p>In his welcoming address, the College Director emphasized resilience. "Matriculation is a fast-paced track. It requires discipline, focus, and mental strength. But remember, you are not alone here. We are a family."</p>
+            <p>Orientation week (Minggu Pengurusan Pelajar Baharu) will commence immediately, focusing on adapting to campus life and academic expectations.</p>
+        </div>
+        <div class="mt-8"><button onclick="showSection('news')" class="text-blue-600 font-bold hover:underline">&larr; Return to News</button></div>
+    </div>
+</div>
+    <div id="login-section" class="hidden min-h-screen bg-gray-100 flex items-center justify-center px-4">
+        <div class="max-w-md w-full bg-white rounded-xl shadow-2xl p-8 border-t-8 border-kmkk-orange">
+            <div class="text-center mb-8">
+                <img src="logo.png" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Logo_KMKK_Berbingkai.png/500px-Logo_KMKK_Berbingkai.png'" alt="KMKK Logo" class="h-20 mx-auto mb-4 rounded">
+                <h2 class="text-2xl font-bold text-kmkk-purple uppercase">Log In</h2>
+                <p class="text-gray-500 text-xs">Enter credentials (admin, lecturer, student)</p>
+            </div>
+            <form id="login-form" class="space-y-4">
+                <input type="text" id="username" class="w-full p-3 border rounded focus:ring-2 focus:ring-orange-400 outline-none" placeholder="User ID" required>
+                <input type="password" id="password" class="w-full p-3 border rounded focus:ring-2 focus:ring-orange-400 outline-none" placeholder="Password" required>
+                <button type="submit" class="w-full bg-kmkk-purple text-white font-bold py-3 rounded hover:opacity-90 transition shadow-lg">Enter Terminal</button>
+            </form>
+            <button onclick="showSection('home')" class="w-full mt-4 text-gray-400 text-xs font-bold hover:text-kmkk-purple"><i class="fas fa-arrow-left mr-1"></i> Back to Public Site</button>
+        </div>
+    </div>
+
+    <div id="dashboard-section" class="hidden min-h-screen bg-gray-100">
+        <nav class="bg-kmkk-purple text-white p-4 flex justify-between items-center shadow-lg">
+            <div class="flex items-center">
+                <img src="logo.png" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Logo_KMKK_Berbingkai.png/500px-Logo_KMKK_Berbingkai.png'" alt="Logo" class="h-10 mr-3 rounded">
+                <span class="font-bold tracking-widest text-sm md:text-base ml-2">TERMINAL ACCESS</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <span id="user-display" class="hidden md:block text-xs font-bold bg-orange-500 px-3 py-1 rounded"></span>
+                <button onclick="logout()" class="text-xs font-bold hover:underline bg-white text-kmkk-purple px-3 py-1 rounded">Log Out</button>
+            </div>
+        </nav>
+
+        <main class="max-w-6xl mx-auto p-6 mt-6">
+            
+            <div id="dashboard-menu-view" class="grid grid-cols-2 md:grid-cols-3 gap-6"></div>
+
+            <div id="dashboard-placeholder-view" class="hidden bg-white p-10 rounded shadow text-center">
+                <h2 id="placeholder-title" class="text-2xl font-bold text-kmkk-purple mb-4"></h2>
+                <p class="text-gray-500">This module is active in the terminal.</p>
+                <button onclick="showDashboardMenu()" class="mt-6 bg-gray-200 px-4 py-2 rounded font-bold text-sm">Back to Menu</button>
+            </div>
+
+            <div id="dashboard-about-view" class="hidden bg-white rounded-xl shadow-lg p-8 border-t-8 border-kmkk-purple">
+                <button onclick="showDashboardMenu()" class="mb-6 text-gray-400 hover:text-kmkk-purple"><i class="fas fa-arrow-left"></i> Back</button>
+                <h2 class="text-3xl font-bold text-kmkk-purple mb-6">Student Profile</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="flex justify-center items-center bg-gray-100 rounded-lg p-6">
+                        <img src="https://pbs.twimg.com/media/G9yD13waQAAFVMV?format=jpg&name=small" alt="Nur Afrina" class="w-40 h-40 object-cover rounded-lg border-4 border-gray-400 shadow-lg">
+                    </div>
+                    <div class="space-y-4">
+                        <div class="border-b pb-2">
+                            <span class="block text-xs uppercase text-gray-500 font-bold">Full Name</span>
+                            <span class="text-xl font-bold text-gray-800">Nur Afrina Binti Othman</span>
+                        </div>
+                        <div class="border-b pb-2">
+                            <span class="block text-xs uppercase text-gray-500 font-bold">Matric Number</span>
+                            <span class="text-lg text-gray-800">MK2520131218</span>
+                        </div>
+                        <div class="border-b pb-2">
+                            <span class="block text-xs uppercase text-gray-500 font-bold">Tutorial Class</span>
+                            <span class="text-lg text-kmkk-orange font-bold">E1T1</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="dashboard-schedule-view" class="hidden bg-white rounded shadow-lg p-4 flex flex-col">
+                <div class="flex justify-between items-center mb-4">
+                     <button onclick="showDashboardMenu()" class="text-gray-400 hover:text-kmkk-purple"><i class="fas fa-arrow-left"></i> Back</button>
+                     <h3 class="font-bold text-kmkk-purple">Class Schedule (E1T1)</h3>
+                </div>
+                <div class="bg-gray-100 rounded p-4 flex flex-col items-center justify-center">
+                    <img src="https://pbs.twimg.com/media/G9itoBTa8AAzMfG?format=jpg&name=medium" alt="Class Schedule" class="max-w-full h-auto rounded shadow mb-6 border border-gray-300">
+                    <a href="E1T1 Schedule.pdf" download class="bg-kmkk-purple text-white px-6 py-3 rounded font-bold hover:bg-orange-500 transition shadow">
+                        <i class="fas fa-file-pdf mr-2"></i> Download Schedule PDF
+                    </a>
+                </div>
+            </div>
+
+            <div id="dashboard-map-view" class="hidden bg-white rounded shadow-lg p-4">
+                <button onclick="showDashboardMenu()" class="mb-4 text-gray-400 hover:text-kmkk-purple"><i class="fas fa-arrow-left"></i> Back</button>
+                <h3 class="font-bold text-kmkk-purple text-xl mb-4">Campus Map (Peta KMKK)</h3>
+                <div class="bg-gray-200 rounded-lg shadow-inner flex flex-col items-center justify-center p-4">
+                    <img src="https://scontent.fkul19-1.fna.fbcdn.net/v/t39.30808-6/495369796_1239825824812116_6012396766588153261_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=833d8c&_nc_ohc=6Js59JxWxlkQ7kNvwFEwRyH&_nc_oc=Adm41xqMo97s7EvEqI1iOIZH1EqYtS_v4YhwiVHwXuDZbkIcgvZ6i2toqITcXIFj5r4&_nc_zt=23&_nc_ht=scontent.fkul19-1.fna&_nc_gid=3LtF5ipDGeAMas_PUopGkw&oh=00_AfqdLZ6vIz7_dlEaeTAat4pW5spGZhEAyaDoxNY6IuP_Ow&oe=695BA515" 
+                         alt="Peta KMKK" class="max-w-full h-auto rounded shadow-lg mb-4">
+                    <a href="Peta Kmkk" download class="mt-4 text-sm text-blue-600 hover:underline"><i class="fas fa-download"></i> Download Map File (Peta Kmkk)</a>
+                </div>
+            </div>
+
+            <div id="dashboard-calendar-view" class="hidden">
+                <button onclick="showDashboardMenu()" class="mb-6 flex items-center text-kmkk-purple font-bold hover:underline"><i class="fas fa-arrow-left mr-2"></i> Back to Menu</button>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
+                    <div class="lg:col-span-1 flex flex-col gap-6">
+                        
+                        <div class="bg-white p-6 rounded-lg shadow border-l-4 border-gray-400" id="selected-date-panel">
+                            <h3 class="font-bold text-gray-800 text-lg mb-1" id="selected-date-display">Select a Date</h3>
+                            <p class="text-xs text-gray-500 mb-4" id="selected-date-status">Click on the calendar to view details.</p>
+                            <div id="day-events-list" class="space-y-2 max-h-56 overflow-y-auto"></div>
+                        </div>
+
+                        <section id="admin-panel" class="hidden bg-white p-6 rounded-lg shadow border-l-4 border-red-600">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-kmkk-orange mb-8">
+                                <h3 class="font-bold text-lg mb-4 text-gray-800">
+                                    <i class="fas fa-newspaper mr-2 text-kmkk-orange"></i>Post New News
+                                </h3>
+                                <div class="grid grid-cols-1 gap-4">
+                                    <input type="text" id="admin-news-title" placeholder="News Headline" 
+                                        class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:border-kmkk-orange">
+                                    
+                                    <textarea id="admin-news-content" placeholder="News details..." rows="3"
+                                        class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:border-kmkk-orange"></textarea>
+                                    
+                                    <div class="flex gap-4">
+                                        <select id="admin-news-category" class="border border-gray-300 rounded p-2 text-sm text-gray-600">
+                                            <option value="achievement">Achievement (Yellow)</option>
+                                            <option value="announcement">Announcement (Blue)</option>
+                                            <option value="event">Event (Red)</option>
+                                        </select>
+                                        <button onclick="addNewsPost()" 
+                                            class="bg-kmkk-purple text-white px-6 py-2 rounded hover:bg-orange-500 transition font-bold shadow-md">
+                                            Publish Post
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <h3 class="font-bold text-red-600 mb-4 uppercase text-sm flex items-center"><i class="fas fa-user-shield mr-2"></i>Admin Event Manager</h3>
+                            <p class="text-xs text-gray-500 mb-3">Post Official Events (Visible to ALL).</p>
+                            <div class="space-y-3">
+                                <input type="text" id="admin-title" placeholder="Event Name" class="w-full p-2 border rounded text-sm">
+                                <label class="text-xs font-bold text-gray-500">Date:</label>
+                                <input type="date" id="admin-date" class="w-full p-2 border rounded text-sm">
+                                <label class="text-xs font-bold text-gray-500">Category:</label>
+                                <select id="admin-category" class="w-full p-2 border rounded text-sm">
+                                    <option value="deadline">Official Deadline (Red)</option>
+                                    <option value="event">Official Event (Purple)</option>
+                                    <option value="sport">Sport (Blue)</option>
+                                </select>
+                                <button onclick="addAdminItem()" class="w-full bg-red-600 text-white font-bold rounded py-2 hover:opacity-90 transition text-sm">Post Official Event</button>
+                            </div>
+                        </section>
+
+                        <section id="student-panel" class="hidden bg-white p-6 rounded-lg shadow border-l-4 border-kmkk-orange">
+                            <h3 class="font-bold text-gray-800 mb-2 uppercase text-sm"><i class="fas fa-user-edit mr-2 text-kmkk-orange"></i>Personal Planner</h3>
+                            <p class="text-xs text-gray-500 mb-4">Add your own study plans. Private.</p>
+                            <div class="space-y-3">
+                                <input type="text" id="personal-title" placeholder="Plan / Note" class="w-full p-2 border rounded text-sm">
+                                <label class="text-xs font-bold text-gray-500">Date:</label>
+                                <input type="date" id="personal-date" class="w-full p-2 border rounded text-sm">
+                                <div class="flex items-center gap-2">
+                                    <label class="text-xs font-bold text-gray-500">Pick Color:</label>
+                                    <input type="color" id="personal-color" value="#f39c12">
+                                </div>
+                                <button onclick="addPersonalItem()" class="w-full bg-kmkk-orange text-white font-bold rounded py-2 hover:opacity-90 transition text-sm">Add to Personal Calendar</button>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <div class="flex justify-between items-center mb-6">
+                                <button onclick="changeMonth(-1)" class="p-2 hover:bg-gray-100 rounded-full"><i class="fas fa-chevron-left text-gray-600"></i></button>
+                                <h2 class="font-bold text-xl md:text-2xl text-kmkk-purple uppercase tracking-wide" id="calendar-month-year">Loading...</h2>
+                                <button onclick="changeMonth(1)" class="p-2 hover:bg-gray-100 rounded-full"><i class="fas fa-chevron-right text-gray-600"></i></button>
+                            </div>
+                            <div class="grid grid-cols-7 gap-2 mb-2 border-b pb-2">
+                                <div class="calendar-day-header text-red-500">SUN</div>
+                                <div class="calendar-day-header">MON</div>
+                                <div class="calendar-day-header">TUE</div>
+                                <div class="calendar-day-header">WED</div>
+                                <div class="calendar-day-header">THU</div>
+                                <div class="calendar-day-header">FRI</div>
+                                <div class="calendar-day-header">SAT</div>
+                            </div>
+                            <div class="calendar-grid" id="calendar-days-container"></div>
+                            <div class="mt-6 flex gap-4 text-xs text-gray-500 flex-wrap">
+                                <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-[#e74c3c] mr-2"></span> Official Deadline</div>
+                                <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-[#2c2c54] mr-2"></span> Official Event</div>
+                                <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-[#3498db] mr-2"></span> Sport</div>
+                                <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-[#f39c12] mr-2"></span> Personal Note</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // --- DATA INITIALIZATION ---
+        // Official Items: Managed by Admin, seen by all
+        let officialItems = JSON.parse(localStorage.getItem('kmkk_official')) || [
+            { id: 1, title: 'Calculus Assignment 2', date: '2026-02-10', category: 'deadline' },
+            { id: 2, title: 'Inter-Block Futsal', date: '2026-02-15', category: 'sport' },
+            { id: 3, title: 'PSPM 2 Exams', date: '2026-05-05', category: 'deadline' }
+        ];
+
+        // Personal Items: Managed by Student, private to student
+        let personalItems = JSON.parse(localStorage.getItem('kmkk_personal')) || [];
+        
+        let currentUser = null;
+        let currentCalDate = new Date(); 
+        let selectedDateISO = null; 
+
+        // --- COUNTDOWN TIMER ---
+        function updateTimer() {
+            const countDate = new Date('May 5, 2026 00:00:00').getTime();
+            const now = new Date().getTime();
+            const gap = countDate - now;
+
+            if (gap > 0) {
+                const second = 1000;
+                const minute = second * 60;
+                const hour = minute * 60;
+                const day = hour * 24;
+
+                document.getElementById('days').innerText = Math.floor(gap / day);
+                document.getElementById('hours').innerText = Math.floor((gap % day) / hour);
+                document.getElementById('minutes').innerText = Math.floor((gap % hour) / minute);
+                document.getElementById('seconds').innerText = Math.floor((gap % minute) / second);
+            } else {
+                document.getElementById('countdown-timer').innerHTML = '<span class="text-white font-bold text-2xl">Exam in Progress or Completed!</span>';
+            }
+        }
+        setInterval(updateTimer, 1000);
+        updateTimer();
+
+        // --- NAVIGATION ---
+        function hideAll() {
+            document.querySelectorAll('.public-page, #login-section, #dashboard-section').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active', 'text-kmkk-orange'));
+        }
+
+        function showSection(sectionId) {
+            hideAll();
+            document.getElementById('public-nav').classList.remove('hidden');
+            const el = document.getElementById(sectionId + '-section');
+            if(el) el.classList.remove('hidden');
+            const btn = document.getElementById('nav-' + sectionId);
+            if(btn) btn.classList.add('active', 'text-kmkk-orange');
+            window.scrollTo(0,0);
+        }
+
+        function showLogin() {
+            hideAll();
+            document.getElementById('public-nav').classList.add('hidden');
+            document.getElementById('login-section').classList.remove('hidden');
+        }
+
+        // --- AUTHENTICATION & DASHBOARD SETUP ---
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+
+            if (p !== 'pass123') { alert('Invalid Password'); return; }
+
+            if(u === 'admin') {
+                login('System Admin', 'admin');
+            } else if(u === 'lecturer') {
+                login('Lecturer', 'lecturer'); 
+            } else if(u === 'student') {
+                login('Nur Afrina', 'student');
+            } else {
+                alert('Access Denied: User ID not found');
+            }
+        });
+
+        function login(name, role) {
+            currentUser = { name, role };
+            hideAll();
+            document.getElementById('public-nav').classList.add('hidden');
+            document.getElementById('dashboard-section').classList.remove('hidden');
+            
+            const displayRole = role === 'admin' ? '(Administrator)' : role === 'lecturer' ? '(Lecturer)' : '(Student E1T1)';
+            document.getElementById('user-display').innerText = `${name} ${displayRole}`;
+            
+            renderDashboardButtons(role);
+            showDashboardMenu(); 
+        }
+
+        function renderDashboardButtons(role) {
+            const container = document.getElementById('dashboard-menu-view');
+            container.innerHTML = ''; 
+
+            if (role === 'student') {
+                const buttons = [
+                    { name: 'About', icon: 'fa-info-circle', action: "showAbout()" },
+                    { name: 'Schedule', icon: 'fa-calendar-week', action: "showSchedule()" },
+                    { name: 'Lectures', icon: 'fa-chalkboard-teacher', action: "showPlaceholder('Lecture Notes')" },
+                    { name: 'Campus Map', icon: 'fa-map-marked-alt', action: "showMap()" },
+                    { name: 'College Event Calendar', icon: 'fa-calendar-alt', action: "showCalendarView()" }
+                ];
+                buttons.forEach(btn => createDashBtn(container, btn));
+            } else if (role === 'lecturer') {
+                const buttons = [
+                    { name: 'Schedule', icon: 'fa-calendar-week', action: "showPlaceholder('Teaching Schedule')" },
+                    { name: 'Class List', icon: 'fa-users', action: "showPlaceholder('Class Attendance List')" },
+                    { name: 'College Event Calendar', icon: 'fa-calendar-alt', action: "showCalendarView()" }
+                ];
+                buttons.forEach(btn => createDashBtn(container, btn));
+            } else if (role === 'admin') {
+                const buttons = [
+                    { name: 'Manage Events', icon: 'fa-calendar-check', action: "showCalendarView()" },
+                    { name: 'Manage Student Schedule', icon: 'fa-user-clock', action: "showPlaceholder('Student Schedule Manager')" },
+                    { name: 'Manage Lecturer Schedule', icon: 'fa-chalkboard-teacher', action: "showPlaceholder('Lecturer Schedule Manager')" }
+                ];
+                buttons.forEach(btn => createDashBtn(container, btn));
+            }
+        }
+
+        function createDashBtn(container, btnData) {
+            const btn = document.createElement('div');
+            btn.className = 'dash-btn';
+            btn.setAttribute('onclick', btnData.action);
+            btn.innerHTML = `<i class="fas ${btnData.icon}"></i><span>${btnData.name}</span>`;
+            container.appendChild(btn);
+        }
+
+        // --- DASHBOARD VIEW HANDLERS ---
+        function hideDashViews() {
+            const views = ['dashboard-menu-view', 'dashboard-calendar-view', 'dashboard-placeholder-view', 'dashboard-about-view', 'dashboard-schedule-view', 'dashboard-map-view'];
+            views.forEach(id => document.getElementById(id).classList.add('hidden'));
+        }
+
+        function showDashboardMenu() { hideDashViews(); document.getElementById('dashboard-menu-view').classList.remove('hidden'); }
+        function showPlaceholder(title) { hideDashViews(); document.getElementById('dashboard-placeholder-view').classList.remove('hidden'); document.getElementById('placeholder-title').innerText = title; }
+        function showAbout() { hideDashViews(); document.getElementById('dashboard-about-view').classList.remove('hidden'); }
+        function showSchedule() { hideDashViews(); document.getElementById('dashboard-schedule-view').classList.remove('hidden'); }
+        function showMap() { hideDashViews(); document.getElementById('dashboard-map-view').classList.remove('hidden'); }
+
+        // --- INTERACTIVE CALENDAR LOGIC ---
+        function showCalendarView() {
+            hideDashViews();
+            document.getElementById('dashboard-calendar-view').classList.remove('hidden');
+            
+            const adminPanel = document.getElementById('admin-panel');
+            const studentPanel = document.getElementById('student-panel');
+
+            // Toggle panels based on role
+            if(currentUser.role === 'admin') {
+                adminPanel.classList.remove('hidden');
+                studentPanel.classList.add('hidden');
+            } else if (currentUser.role === 'student') {
+                adminPanel.classList.add('hidden');
+                studentPanel.classList.remove('hidden');
+            } else {
+                adminPanel.classList.add('hidden');
+                studentPanel.classList.add('hidden');
+            }
+            
+            const todayStr = new Date().toISOString().split('T')[0];
+            if(document.getElementById('admin-date')) document.getElementById('admin-date').value = todayStr;
+            if(document.getElementById('personal-date')) document.getElementById('personal-date').value = todayStr;
+
+            renderCalendar();
+        }
+
+        function changeMonth(delta) {
+            currentCalDate.setMonth(currentCalDate.getMonth() + delta);
+            renderCalendar();
+        }
+
+        function getEventsForDate(isoDate) {
+            let events = [];
+            // Official (Admin) events - visible to ALL
+            officialItems.forEach(item => {
+                if(item.date === isoDate) {
+                    let color = '#2c2c54'; // Default Purple
+                    let label = 'Official Event';
+                    if(item.category === 'deadline') { color = '#e74c3c'; label = 'Deadline'; }
+                    if(item.category === 'sport') { color = '#3498db'; label = 'Sport'; }
+                    events.push({ ...item, type: 'official', displayColor: color, categoryLabel: label });
+                }
+            });
+            // Personal (Student) events - visible ONLY to Student
+            if(currentUser.role === 'student') {
+                personalItems.forEach(item => {
+                    if(item.date === isoDate) {
+                        events.push({ ...item, type: 'personal', displayColor: item.color, categoryLabel: 'Personal' });
+                    }
+                });
+            }
+            return events;
+        }
+
+        function renderCalendar() {
+            const container = document.getElementById('calendar-days-container');
+            container.innerHTML = '';
+            
+            const year = currentCalDate.getFullYear();
+            const month = currentCalDate.getMonth();
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            document.getElementById('calendar-month-year').innerText = `${monthNames[month]} ${year}`;
+
+            const firstDayIndex = new Date(year, month, 1).getDay(); // 0=Sun
+            const lastDay = new Date(year, month + 1, 0).getDate();
+            const todayISO = new Date().toISOString().split('T')[0];
+
+            for(let i=0; i<firstDayIndex; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = "calendar-day bg-gray-50 cursor-default border-transparent hover:bg-gray-50";
+                container.appendChild(emptyCell);
+            }
+
+            for(let i=1; i<=lastDay; i++) {
+                const mStr = (month + 1).toString().padStart(2, '0');
+                const dStr = i.toString().padStart(2, '0');
+                const dateISO = `${year}-${mStr}-${dStr}`;
+                const events = getEventsForDate(dateISO);
+                
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-day';
+                if(dateISO === todayISO) dayEl.classList.add('today');
+                if(dateISO === selectedDateISO) dayEl.classList.add('selected');
+
+                dayEl.innerHTML = `<div class="day-number">${i}</div>`;
+                
+                const dotsContainer = document.createElement('div');
+                dotsContainer.className = 'event-indicator-container';
+                events.forEach(evt => {
+                    const dot = document.createElement('span');
+                    dot.className = 'event-dot';
+                    dot.style.backgroundColor = evt.displayColor;
+                    dotsContainer.appendChild(dot);
+                });
+                dayEl.appendChild(dotsContainer);
+                dayEl.onclick = () => selectDate(dateISO);
+                container.appendChild(dayEl);
+            }
+        }
+
+        function selectDate(dateISO) {
+            selectedDateISO = dateISO;
+            if(document.getElementById('admin-date')) document.getElementById('admin-date').value = dateISO;
+            if(document.getElementById('personal-date')) document.getElementById('personal-date').value = dateISO;
+            renderCalendar();
+
+            const d = new Date(dateISO);
+            document.getElementById('selected-date-display').innerText = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            
+            const events = getEventsForDate(dateISO);
+            const listContainer = document.getElementById('day-events-list');
+            listContainer.innerHTML = '';
+
+            if(events.length === 0) {
+                document.getElementById('selected-date-status').innerText = "No events on this day.";
+            } else {
+                document.getElementById('selected-date-status').innerText = `${events.length} event(s) found.`;
+                events.forEach(evt => {
+                    const div = document.createElement('div');
+                    div.className = "text-xs p-2 rounded bg-gray-100 flex justify-between items-center border-l-4 mb-2 shadow-sm";
+                    div.style.borderLeftColor = evt.displayColor;
+                    
+                    let delBtn = '';
+                    if(currentUser.role === 'admin' && evt.type === 'official') {
+                         delBtn = `<button onclick="deleteEvent(${evt.id}, 'official')" class="text-gray-400 hover:text-red-500 ml-2"><i class="fas fa-trash"></i></button>`;
+                    } else if(currentUser.role === 'student' && evt.type === 'personal') {
+                        delBtn = `<button onclick="deleteEvent(${evt.id}, 'personal')" class="text-gray-400 hover:text-red-500 ml-2"><i class="fas fa-trash"></i></button>`;
+                    }
+
+                    div.innerHTML = `<div><span class="block font-bold" style="color:${evt.displayColor}">${evt.categoryLabel.toUpperCase()}</span><span>${evt.title}</span></div>${delBtn}`;
+                    listContainer.appendChild(div);
+                });
+            }
+        }
+
+        function addAdminItem() {
+            const title = document.getElementById('admin-title').value;
+            const date = document.getElementById('admin-date').value;
+            const category = document.getElementById('admin-category').value; 
+            if(!title || !date) { alert("Please fill in Title and Date"); return; }
+
+            officialItems.push({ id: Date.now(), title, date, category });
+            localStorage.setItem('kmkk_official', JSON.stringify(officialItems));
+            document.getElementById('admin-title').value = '';
+            selectDate(date); 
+        }
+
+        function addPersonalItem() {
+            const title = document.getElementById('personal-title').value;
+            const date = document.getElementById('personal-date').value;
+            const color = document.getElementById('personal-color').value;
+            if(!title || !date) { alert("Please fill in Note and Date"); return; }
+
+            personalItems.push({ id: Date.now(), title, date, color });
+            localStorage.setItem('kmkk_personal', JSON.stringify(personalItems));
+            document.getElementById('personal-title').value = '';
+            selectDate(date);
+        }
+
+        function deleteEvent(id, type) {
+            if(!confirm('Delete this event?')) return;
+            if(type === 'official') {
+                officialItems = officialItems.filter(i => i.id !== id);
+                localStorage.setItem('kmkk_official', JSON.stringify(officialItems));
+            } else {
+                personalItems = personalItems.filter(i => i.id !== id);
+                localStorage.setItem('kmkk_personal', JSON.stringify(personalItems));
+            }
+            if(selectedDateISO) selectDate(selectedDateISO);
+            else renderCalendar();
+        }
+
+        function logout() { location.reload(); }
+        // --- NEWS SYSTEM LOGIC ---
+
+// 1. Load News from LocalStorage
+let newsPosts = JSON.parse(localStorage.getItem('kmkk_news')) || [];
+
+// 2. Function to Add News
+function addNewsPost() {
+    const title = document.getElementById('admin-news-title').value;
+    const content = document.getElementById('admin-news-content').value;
+    const category = document.getElementById('admin-news-category').value;
+    
+    if (!title || !content) {
+        alert("Please fill in the Headline and Details.");
+        return;
+    }
+
+    const newPost = {
+        id: Date.now(),
+        title: title,
+        content: content,
+        category: category,
+        date: new Date().toLocaleDateString()
+    };
+
+    // Add to beginning of array
+    newsPosts.unshift(newPost);
+    
+    // Save to storage
+    localStorage.setItem('kmkk_news', JSON.stringify(newsPosts));
+    
+    // Clear form and refresh display
+    document.getElementById('admin-news-title').value = '';
+    document.getElementById('admin-news-content').value = '';
+    alert("News posted successfully!");
+    renderNews();
+}
+
+// 3. Function to Delete News (Optional, for Admin)
+function deleteNews(id) {
+    if(!confirm("Delete this news post?")) return;
+    newsPosts = newsPosts.filter(post => post.id !== id);
+    localStorage.setItem('kmkk_news', JSON.stringify(newsPosts));
+    renderNews();
+}
+
+// 4. Function to Render News on Public Page
+function renderNews() {
+    const container = document.getElementById('dynamic-news-feed');
+    if (!container) return;
+
+    container.innerHTML = newsPosts.map(post => {
+        // Set colors based on category
+        let colorClass = 'border-blue-500';
+        let iconClass = 'fa-bullhorn text-blue-500';
+        
+        if(post.category === 'achievement') {
+            colorClass = 'border-yellow-500';
+            iconClass = 'fa-trophy text-yellow-500';
+        } else if (post.category === 'event') {
+            colorClass = 'border-red-500';
+            iconClass = 'fa-calendar-alt text-red-500';
+        }
+
+        return `
+        <div class="bg-white rounded-xl shadow-md border-t-4 ${colorClass} p-6 hover:shadow-lg transition">
+            <div class="flex justify-between items-start mb-3">
+                <div class="flex items-center">
+                    <i class="fas ${iconClass} text-xl mr-3"></i>
+                    <span class="text-xs font-bold text-gray-400 uppercase">${post.date}</span>
+                </div>
+                <button onclick="deleteNews(${post.id})" class="text-gray-300 hover:text-red-500 text-sm"><i class="fas fa-trash"></i></button>
+            </div>
+            <h3 class="font-bold text-lg text-gray-800 mb-2">${post.title}</h3>
+            <p class="text-gray-600 text-sm leading-relaxed">${post.content}</p>
+        </div>
+        `;
+    }).join('');
+}
+
+// Call this when page loads
+document.addEventListener('DOMContentLoaded', renderNews);
+    </script>
+</body>
+</html>
