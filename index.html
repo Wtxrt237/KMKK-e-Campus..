@@ -1363,6 +1363,241 @@ function renderNews() {
 
 // Call this when page loads
 document.addEventListener('DOMContentLoaded', renderNews);
+
+// --- [PATCH] ENABLE PERSONAL CALENDAR FOR LECTURERS ---
+    // Paste this at the bottom of your script section
+
+    // 1. Override the logic that fetches events to include Lecturers
+    getEventsFor = function(isoDate) {
+        let events = [];
+        
+        // Load Official items (Preserving original logic)
+        officialItems.forEach(item => {
+            let color = '#2c2c54'; 
+            let label = 'Official Event';
+            if(item.category === 'deadline') { color = '#e74c3c'; label = 'Deadline'; }
+            if(item.category === 'sport') { color = '#3498db'; label = 'Sport'; }
+            events.push({ ...item, type: 'official', displayColor: color, categoryLabel: label });
+        });
+
+        // Load Personal Items for BOTH Student AND Lecturer
+        // (Original code only checked for 'student')
+        if(currentUser && (currentUser.role === 'student' || currentUser.role === 'lecturer')) {
+            personalItems.forEach(item => {
+                if(item.date === isoDate) {
+                    events.push({ ...item, type: 'personal', displayColor: item.color, categoryLabel: 'Personal' });
+                }
+            });
+        }
+        return events;
+    };
+
+    // 2. Override the Calendar View to reveal the "Add Note" panel for Lecturers
+    const _original_showCalendarView = showCalendarView;
+    showCalendarView = function() {
+        // Run the original function first to switch screens
+        if (typeof _original_showCalendarView === 'function') {
+            _original_showCalendarView();
+        }
+
+        // If user is a Lecturer, find the hidden "Personal Note" form and show it
+        if(currentUser && currentUser.role === 'lecturer') {
+            const personalInput = document.getElementById('personal-title');
+            if(personalInput) {
+                // Find the container holding the input (usually a hidden section or div)
+                // We search upwards for the closest container section
+                let container = personalInput.closest('section'); 
+                
+                // If not in a section, try finding the closest main div wrapper
+                if(!container) container = personalInput.closest('div.bg-white.rounded-lg');
+
+                if(container) {
+                    container.classList.remove('hidden');
+                    container.style.display = 'block'; // Force visibility
+                }
+            }
+        }
+    };
+  
+// ==========================================
+    //   MASTER PATCH v3.0: LECTURER FEATURES + WORKING BACK BUTTON
+    // ==========================================
+
+    (function() { // Wrap in a closure to keep variables clean, but expose functions to window
+
+// 1. DATA GENERATION
+const LECTURER_DATA = {
+    profile: {
+        name: "Dr. Sarah binti Ahmad",
+        job: "Senior Lecturer (Department of Mechanical Engineering)",
+        image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80"
+    },
+    classes: {
+        "E1T1": [], "M1T1": [], "B4T4": [], "C6T6": []
+    }
+};
+
+// Generate Students
+const names = ["Ali", "Chong", "Muthu", "Sarah", "Jessica", "Ahmad", "Nur", "Tan", "Raj", "Kevin", "Dayang", "Omar", "Wong", "Preity", "Farid", "Lisa", "Hassan", "Zack"];
+for (let className in LECTURER_DATA.classes) {
+    for (let i = 0; i < 18; i++) { 
+        let prefix = Math.random() > 0.5 ? "MK" : "MS";
+        let matric = `${prefix}2520${Math.floor(100000 + Math.random() * 900000)}`;
+        let sName = names[i % names.length] + " " + String.fromCharCode(65 + i);
+        LECTURER_DATA.classes[className].push({ id: i + 1, name: sName, matric: matric });
+    }
+}
+
+// 2. INJECT HTML VIEWS
+function injectLecturerViews() {
+    let main = document.querySelector('main.max-w-6xl') || document.querySelector('main') || document.body;
+    
+    // A. Profile View
+    let profileHTML = `
+        <div id="view-lecturer-profile" class="lecturer-view hidden bg-white rounded-xl shadow-lg p-8 border-t-8 border-indigo-900">
+            <button onclick="backToLecturerDashboard()" class="mb-6 text-gray-400 hover:text-indigo-900 font-bold flex items-center gap-2">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </button>
+            <div class="flex flex-col md:flex-row gap-8 items-center">
+                <img src="${LECTURER_DATA.profile.image}" class="w-40 h-40 rounded-full border-4 border-gray-200 shadow-xl object-cover">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-800">${LECTURER_DATA.profile.name}</h2>
+                    <p class="text-lg text-orange-500 font-bold mb-4">${LECTURER_DATA.profile.job}</p>
+                    <div class="grid grid-cols-2 gap-4 text-sm bg-gray-50 p-4 rounded">
+                        <div><span class="text-gray-400 block">Department</span><span class="font-bold">Engineering</span></div>
+                        <div><span class="text-gray-400 block">Staff ID</span><span class="font-bold">L992021</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+
+    // B. Schedule View
+    let scheduleHTML = `
+        <div id="view-lecturer-schedule" class="lecturer-view hidden bg-white p-6 rounded-xl shadow-lg">
+            <button onclick="backToLecturerDashboard()" class="mb-4 text-gray-400 font-bold flex items-center gap-2">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </button>
+            <h2 class="text-2xl font-bold text-indigo-900 mb-6">Teaching Schedule</h2>
+            <div class="space-y-4">
+                ${Object.keys(LECTURER_DATA.classes).map((cls, idx) => `
+                <div class="flex items-center p-4 bg-gray-50 border-l-4 ${idx % 2 == 0 ? 'border-indigo-500' : 'border-orange-500'} rounded">
+                    <div class="w-16 text-center font-bold text-gray-600">${['MON','TUE','WED','THU'][idx]}</div>
+                    <div class="flex-1 px-4">
+                        <div class="font-bold text-indigo-900">${cls} - Engineering Math</div>
+                        <div class="text-xs text-gray-500">08:00 AM - 10:00 AM</div>
+                    </div>
+                    <div class="font-bold text-gray-400">BK-${10+idx}</div>
+                </div>`).join('')}
+            </div>
+        </div>`;
+
+    // C. Class List View
+    let classListHTML = `
+        <div id="view-lecturer-classlist" class="lecturer-view hidden bg-white p-6 rounded-xl shadow-lg">
+            <button onclick="backToLecturerDashboard()" class="mb-4 text-gray-400 font-bold flex items-center gap-2">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </button>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-indigo-900">Class List</h2>
+                <select onchange="renderClassTable(this.value)" class="border-2 border-orange-400 rounded p-2 font-bold text-gray-700">
+                    ${Object.keys(LECTURER_DATA.classes).map(c => `<option value="${c}">${c}</option>`).join('')}
+                </select>
+            </div>
+            <table class="w-full text-left">
+                <thead class="bg-indigo-900 text-white"><tr><th class="p-3">Name</th><th class="p-3">Matric</th></tr></thead>
+                <tbody id="lecturer-students-body" class="divide-y"></tbody>
+            </table>
+        </div>`;
+
+    const div = document.createElement('div');
+    div.innerHTML = profileHTML + scheduleHTML + classListHTML;
+    main.appendChild(div);
+}
+injectLecturerViews();
+
+// 3. GLOBAL FUNCTIONS (Window Scope)
+
+// The Fix: Navigation function
+window.backToLecturerDashboard = function() {
+    // Hide all specific lecturer views
+    document.querySelectorAll('.lecturer-view').forEach(el => el.classList.add('hidden'));
+    
+    // Show the Menu Button Grid
+    const menu = document.getElementById('dashboard-menu-view');
+    if(menu) menu.classList.remove('hidden');
+};
+
+window.renderClassTable = function(className) {
+    const tbody = document.getElementById('lecturer-students-body');
+    const students = LECTURER_DATA.classes[className];
+    if (tbody && students) {
+        tbody.innerHTML = students.map(s => `
+            <tr class="hover:bg-blue-50">
+                <td class="p-3 font-bold text-gray-700">${s.name}</td>
+                <td class="p-3 font-mono text-blue-600">${s.matric}</td>
+            </tr>`).join('');
+    }
+};
+
+window.openLecturerProfile = function() {
+    document.getElementById('dashboard-menu-view').classList.add('hidden'); // Hide menu
+    document.getElementById('view-lecturer-profile').classList.remove('hidden'); // Show profile
+};
+window.openLecturerSchedule = function() {
+    document.getElementById('dashboard-menu-view').classList.add('hidden');
+    document.getElementById('view-lecturer-schedule').classList.remove('hidden');
+};
+window.openLecturerClassList = function() {
+    document.getElementById('dashboard-menu-view').classList.add('hidden');
+    document.getElementById('view-lecturer-classlist').classList.remove('hidden');
+    window.renderClassTable('E1T1'); 
+};
+
+// 4. OVERRIDE BUTTON GENERATION
+const oldRender = window.renderDashboardButtons;
+window.renderDashboardButtons = function(role) {
+    const menuContainer = document.getElementById('dashboard-menu-view');
+    
+    if (role === 'lecturer') {
+        if(menuContainer) {
+            menuContainer.innerHTML = '';
+            const buttons = [
+                { label: 'Profile', icon: 'fa-id-badge', onclick: 'openLecturerProfile()' },
+                { label: 'Schedule', icon: 'fa-calendar-day', onclick: 'openLecturerSchedule()' },
+                { label: 'Class List', icon: 'fa-users', onclick: 'openLecturerClassList()' },
+                { label: 'Events', icon: 'fa-calendar-alt', onclick: 'showCalendarView()' }
+            ];
+
+            buttons.forEach(btn => {
+                const b = document.createElement('div');
+                b.className = 'dash-btn bg-white p-6 rounded-xl shadow-md flex flex-col items-center justify-center cursor-pointer hover:shadow-lg transition gap-3 border-b-4 border-indigo-900';
+                b.setAttribute('onclick', btn.onclick);
+                b.innerHTML = `<i class="fas ${btn.icon} text-3xl text-indigo-900"></i><span class="font-bold text-gray-700">${btn.label}</span>`;
+                menuContainer.appendChild(b);
+            });
+            menuContainer.classList.remove('hidden');
+        }
+        
+        // Patch Event Calendar to allow lecturers
+        if(typeof getEventsFor === 'function') {
+             // Ensure personal notes show for lecturer too
+             const oldGetEvents = getEventsFor;
+             getEventsFor = function(d) {
+                 // We just run logic here to ensure personalItems are fetched if logic was strictly student
+                 // Since we can't easily rewrite the internal logic of the original function without copying it,
+                 // we assume the user might have pasted the previous calendar patch.
+                 // If not, this at least keeps the UI working.
+                 return oldGetEvents(d); 
+             }
+        }
+
+    } else {
+         if (typeof oldRender === 'function') oldRender(role);
+    }
+};
+
+})();
+
     </script>
 </body>
 </html>
